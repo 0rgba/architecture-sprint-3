@@ -1,0 +1,11 @@
+@startuml
+skinparam BackgroundColor transparent
+skinparam componentStyle rectangle
+component "Тёплый дом" {
+        component "Монолит"
+}
+[Датчик]->[Монолит]
+[Монолит]->[Датчик]
+[Пользователь]->[Монолит]
+[Специалист по подключению]->[Монолит]
+@enduml

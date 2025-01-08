@@ -1,0 +1,47 @@
+@startuml
+left to right direction
+skinparam BackgroundColor transparent
+skinparam componentStyle rectangle
+
+component "Тёплый дом" {
+        component APIGateway
+        queue Kafka
+
+        component Пользователи as Users {
+            database UsersDB
+            component UsersMicroservice
+
+            [UsersMicroservice] -> [UsersDB]
+        }
+
+        component Устройства as Devices {
+            database DevicesDB
+            component DevicesMicroservice
+
+            [DevicesMicroservice] -> [DevicesDB]
+        }
+
+        component Сценарии as Scenarios {
+            database ScenariosDB
+            component ScenariosMicroservice
+
+            [ScenariosMicroservice] -> [ScenariosDB]
+        }
+
+        [APIGateway] -> [UsersMicroservice]
+        [APIGateway] -> [DevicesMicroservice]
+        [APIGateway] -> [ScenariosMicroservice]
+
+        [Kafka] -> [UsersMicroservice]
+        [Kafka] -> [DevicesMicroservice]
+        [Kafka] -> [ScenariosMicroservice]
+
+        [UsersMicroservice] -> [Kafka]
+        [DevicesMicroservice] -> [Kafka]
+        [ScenariosMicroservice] -> [Kafka]
+}
+
+[Датчик]->[APIGateway]
+[Пользователь]->[APIGateway]
+
+@enduml
