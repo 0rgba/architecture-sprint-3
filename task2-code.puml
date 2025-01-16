@@ -1,0 +1,78 @@
+@startuml
+title Диаграмма описания критичных частей кода системы "Тёплый дом"
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class DeviceVendor {
+  +ID
+  +String Name
+}
+
+class DeviceType {
+  +ID
+  +FKey Vendor
+  +String name
+  +boolean active
+  +string image
+}
+
+class User {
+  +ID
+  +string email
+
+  +void login()
+  +void logout()
+  +void resetPassword()
+}
+
+class ContactType {
+  +ID
+  +ENUM Type
+  +String Name
+}
+
+class UserContacts {
+  +ID
+  +FKey UserID
+  +FKey ContactType
+  +String Contact
+}
+
+class Device {
+  +ID
+  +FKey Type
+  +FKey UserID
+  +String name
+  +void register()
+  +void unregister()
+  +messages heartbeat(telemetry)
+}
+
+class ScenarioCondition {
+  +ID
+  +String name
+  +String condition
+  +String parameter
+}
+
+class Scenario {
+  +ID
+  +String name
+  +boolean active
+
+  +void setActive(boolean)
+  +void check()
+  +void trigger()
+}
+
+DeviceVendor "1" -- "0..*" DeviceType : has
+DeviceType "1" -- "0..*" Device : has
+ContactType "1" -- "0..*" UserContacts : has
+User "1" -- "0..*" UserContacts : has
+
+Scenario "1" -- "1..*" Device : has
+Scenario "1" -- "1..*" ScenarioCondition : has
+
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+
+title Диаграмма контейнеров предлагаемой реализации системы "Тёплый дом"
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(Customer, "Клиент компании")
+
+System(device, "Датчик")
+
+Container_Boundary(WarmHomeSystem, "Тёплый дом") {
+  Container(UsersMicroservice, "UsersMicroservice", "Java/Spring", "Микросервис для работы с данными пользователей")
+
+  Container(DevicesMicroservice, "DevicesMicroservice", "Java/Spring", "Микросервис для работы с данными устройств")
+
+  Container(ScenariosMicroservice, "ScenariosMicroservice", "Java/Spring", "Микросервис для работы со сценариями устройств")
+
+  ContainerDb(UserDB, 'База данных пользователей', 'PostgesSQL')
+  ContainerDb(DevicesDB, 'База данных устройств', 'PostgesSQL')
+  ContainerDb(ScenariosDB, 'База данных сценарией', 'PostgesSQL')
+
+  Container(APIGateway, "API Gateway", "nginx", "Принимает и перенаправляет все входящие запросы")
+  Container(Kafka, "Kafka")
+  Container(WebApp, "Web Application", "ReactJS", "Взаимодействует с пользователем")
+
+  Rel(APIGateway, UsersMicroservice, "Пересылает запрос")
+  Rel(APIGateway, DevicesMicroservice, "Пересылает запрос")
+  Rel(APIGateway, ScenariosMicroservice, "Пересылает запрос")
+
+  Rel(Kafka, UsersMicroservice, "Передаёт межсервисные сообщения")
+  Rel(Kafka, DevicesMicroservice, "Передаёт межсервисные сообщения")
+  Rel(Kafka, ScenariosMicroservice, "Передаёт межсервисные сообщения")
+
+  Rel(UsersMicroservice, Kafka, "Передаёт межсервисные сообщения")
+  Rel(DevicesMicroservice, Kafka, "Передаёт межсервисные сообщения")
+  Rel(ScenariosMicroservice, Kafka, "Передаёт межсервисные сообщения")
+
+  Rel(UsersMicroservice, UserDB, "Хранит данные")
+  Rel(DevicesMicroservice, DevicesDB, "Хранит данные")
+  Rel(ScenariosMicroservice, ScenariosDB, "Хранит данные")
+
+  Rel(WebApp, APIGateway, "Передаёт данные")
+}
+
+Rel(device, APIGateway, "Передаёт показания и получает команды")
+Rel(Customer, WebApp, "Взаимодействует с платформой по веб-интерфейсу")
+
+@enduml

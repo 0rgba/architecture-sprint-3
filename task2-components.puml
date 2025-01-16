@@ -1,0 +1,107 @@
+@startuml
+title Схема взаимодействий компонентов системы "Тёплый дом"
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(WarmHomeSystem, "Тёплый дом") {
+  Container(ApiGateway, "API Gateway", "Принимает и перенаправляет все входящие запросы")
+  Container(Kafka, "Kafka")
+  Container(WebApp, "Web Application", "ReactJS", "Взаимодействует с пользователем")
+
+  Container(UsersApp, "Users Application")
+  Container(DevicesApp, "Devices Application")
+  Container(ScenariosApp, "Scenarios Application")
+  Container(TelemetryApp, "Scenarios Application")
+}
+
+Container_Boundary(UsersApp, "Users Application") {
+  Container(UsersMicroservice, "Users Microservice") {
+    Component(UserController, "UserController", "Работа с профилями пользователей")
+    Component(UserAuthController, "UserAuthController", "Аутентификация и авторизация пользователей")
+    Component(UserSupportController, "UserSupportController", "Работа с запросами пользователей в саппорт")
+    Component(UserServiceLayer, "Service Layer", "Business logic")
+    Component(UserRepositoryLayer, "Repository Layer", "Data access logic")
+  }
+
+  Component(UsersDB, "Users DB")
+
+  Rel(UserRepositoryLayer,UsersDB,"Reads/Writes user data")
+  Rel(UserServiceLayer,UserRepositoryLayer,"Reads/Writes data")
+
+  Rel(UserAuthController,UserServiceLayer,"Calls business logic")
+  Rel(UserSupportController,UserServiceLayer,"Calls business logic")
+  Rel(UserController,UserServiceLayer,"Calls business logic")
+}
+
+Container_Boundary(DevicesApp, "Devices Application") {
+  Container(DevicesMicroservice, "Devices Microservice") {
+    Component(DeviceController, "DeviceController", "Работа с профилями устройств")
+    Component(DeviceAuthController, "DeviceAuthController", "Аутентификация и авторизация устройств")
+    Component(DeviceGroupController, "DeviceGroupController", "Работа с группами устройств (группы/здания/квартиры/etc)")
+    Component(DevicesServiceLayer, "Service Layer", "Business logic")
+    Component(DevicesRepositoryLayer, "Repository Layer", "Data access logic")
+  }
+
+  Component(DevicesDB, "Devices DB")
+
+  Rel(DevicesRepositoryLayer,DevicesDB,"Reads/Writes devices data")
+  Rel(DevicesServiceLayer,DevicesRepositoryLayer,"Reads/Writes data")
+
+  Rel(DeviceController,DevicesServiceLayer,"Calls business logic")
+  Rel(DeviceAuthController,DevicesServiceLayer,"Calls business logic")
+  Rel(DeviceGroupController,DevicesServiceLayer,"Calls business logic")
+}
+
+Container_Boundary(ScenariosApp, "Scenarios Application") {
+  Container(ScenariosMicroservice, "Scenarios Microservice") {
+    Component(ScenariosController, "ScenariosController", "Работа со сценариями")
+    Component(ScenariosMonitoringController, "ScenariosMonitoringController", "Работа с мониторингами")
+
+    Component(ScenariosServiceLayer, "Service Layer", "Business logic")
+    Component(ScenariosRepositoryLayer, "Repository Layer", "Data access logic")
+  }
+
+  Component(ScenariosDB, "Scenarios DB")
+
+  Rel(ScenariosRepositoryLayer,ScenariosDB,"Reads/Writes scenarios data")
+  Rel(ScenariosServiceLayer,ScenariosRepositoryLayer,"Reads/Writes data")
+
+  Rel(ScenariosController,ScenariosRepositoryLayer,"Calls business logic")
+  Rel(ScenariosMonitoringController,ScenariosRepositoryLayer,"Calls business logic")
+}
+
+Container_Boundary(TelemetryApp, "Telemetry Application") {
+  Container(TelemetryMicroservice, "Telemetry Microservice") {
+    Component(TelemetryCurrentController, "TelemetryCurrentController", "Получение текущих данных")
+    Component(TelemetryHistoryController, "TelemetryHistoryController", "Получение исторических данных")
+
+    Component(TelemetryServiceLayer, "Service Layer", "Business logic")
+    Component(TelemetryRepositoryLayer, "Repository Layer", "Data access logic")
+  }
+
+  Component(TelemetryDB, "Telemetry DB")
+
+  Rel(TelemetryRepositoryLayer,TelemetryDB,"Reads/Writes telemetry data")
+  Rel(TelemetryServiceLayer,TelemetryRepositoryLayer,"Reads/Writes data")
+
+  Rel(TelemetryCurrentController,TelemetryServiceLayer,"Calls business logic")
+  Rel(TelemetryHistoryController,TelemetryServiceLayer,"Calls business logic")
+}
+
+Rel(WebApp,ApiGateway, "Запрашивает данные")
+
+Rel(ApiGateway,DevicesMicroservice, "Перенаправляет запрос")
+Rel(ApiGateway,UsersMicroservice, "Перенаправляет запрос")
+Rel(ApiGateway,ScenariosMicroservice, "Перенаправляет запрос")
+Rel(ApiGateway,ScenariosMicroservice, "Перенаправляет запрос")
+Rel(ApiGateway,TelemetryMicroservice, "Перенаправляет запрос")
+
+Rel(DeviceController,Kafka, "Отправляет ручную команду пользователя в очередь устройства")
+Rel(ScenariosController,Kafka, "Отправляет команду по сценарию в очередь устройства")
+Rel(ScenariosMonitoringController,Kafka, "Отправляет событие мониторингаа")
+
+Rel(ScenariosController,TelemetryCurrentController, "Получение текущих данных")
+Rel(ScenariosMonitoringController,TelemetryCurrentController, "Получение текущих данных")
+@enduml

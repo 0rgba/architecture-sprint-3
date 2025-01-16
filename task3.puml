@@ -1,0 +1,112 @@
+@startuml
+
+entity User {
+  * user_id : NUMBER
+  --
+  email : VARCHAR
+  passwordHash : VARCHAR
+  status : BOOLEAN
+}
+
+entity DeviceVendor {
+  * vendor_id : NUMBER
+  --
+  name : VARCHAR
+}
+
+entity DeviceType {
+  * device_type_id : NUMBER
+  --
+  vendor_id : FKEY
+  name : VARCHAR
+}
+
+entity Device {
+  * device_id : NUMBER
+  --
+  device_type_id : FKEY
+  serial_number : VARCHAR
+  status : BOOLEAN
+}
+
+entity DeviceGroup {
+  * device_group_id : NUMBER
+  --
+  name : VARCHAR
+  location : VARCHAR
+}
+
+entity PermissionsDeviceGroup {
+  * permission_id : NUMBER
+  --
+  device_group_id : FKEY
+  user_id : FKEY
+  owner_id : FKEY
+  name : VARCHAR
+}
+
+entity Telemetry {
+  * telemetry_id : NUMBER
+  --
+  device_id : FKEY
+  datetime : DATETIME
+  data : STRING
+}
+
+entity Condition {
+  * condition_id : NUMBER
+  --
+  user_id : FKEY
+  condition : VARCHAR
+  parameter : VARCHAR
+}
+
+entity Scenario {
+  * scenario_id : NUMBER
+  --
+  condition_id : FKEY
+  action: STRING
+}
+
+entity ScenarioRun {
+  * scenario_run_id : NUMBER
+  --
+  datetime : DATETIME
+}
+
+entity Command {
+  * command_id : NUMBER
+  --
+  device_group_id: FKEY
+  command : VARCHAR
+}
+
+entity SupportRequest {
+  * request_id : NUMBER
+  --
+  user_id: FKEY
+  status: ENUM
+}
+
+entity SupportRequestMessage {
+  * request_message_id : NUMBER
+  --
+  request_id: FKEY
+  message: VARCHAR
+  direction: BOOLEAN
+}
+
+DeviceVendor ||--o{ DeviceType
+DeviceGroup ||--o{ Device
+User ||--o{ PermissionsDeviceGroup
+PermissionsDeviceGroup ||--{ DeviceGroup
+DeviceType ||--o{ Device
+Device ||--o{ Telemetry
+User ||--o{ Condition
+Scenario ||--|{ Condition
+Scenario ||--o{ ScenarioRun
+Command ||--|{ DeviceGroup
+User ||--|{ SupportRequest
+SupportRequest ||--|{ SupportRequestMessage
+
+@enduml
