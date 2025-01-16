@@ -1,47 +1,48 @@
 @startuml
-left to right direction
-skinparam BackgroundColor transparent
-skinparam componentStyle rectangle
 
-component "Тёплый дом" {
-        component APIGateway
-        queue Kafka
+title Диаграмма контейнеров предлагаемой реализации системы "Тёплый дом"
 
-        component Пользователи as Users {
-            database UsersDB
-            component UsersMicroservice
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
 
-            [UsersMicroservice] -> [UsersDB]
-        }
+Person(Customer, "Клиент компании")
 
-        component Устройства as Devices {
-            database DevicesDB
-            component DevicesMicroservice
+System(device, "Датчик")
 
-            [DevicesMicroservice] -> [DevicesDB]
-        }
+Container_Boundary(WarmHomeSystem, "Тёплый дом") {
+  Container(UsersMicroservice, "UsersMicroservice", "Java/Spring", "Микросервис для работы с данными пользователей")
 
-        component Сценарии as Scenarios {
-            database ScenariosDB
-            component ScenariosMicroservice
+  Container(DevicesMicroservice, "DevicesMicroservice", "Java/Spring", "Микросервис для работы с данными устройств")
 
-            [ScenariosMicroservice] -> [ScenariosDB]
-        }
+  Container(ScenariosMicroservice, "ScenariosMicroservice", "Java/Spring", "Микросервис для работы со сценариями устройств")
 
-        [APIGateway] -> [UsersMicroservice]
-        [APIGateway] -> [DevicesMicroservice]
-        [APIGateway] -> [ScenariosMicroservice]
+  ContainerDb(UserDB, 'База данных пользователей', 'PostgesSQL')
+  ContainerDb(DevicesDB, 'База данных устройств', 'PostgesSQL')
+  ContainerDb(ScenariosDB, 'База данных сценарией', 'PostgesSQL')
 
-        [Kafka] -> [UsersMicroservice]
-        [Kafka] -> [DevicesMicroservice]
-        [Kafka] -> [ScenariosMicroservice]
+  Container(APIGateway, "API Gateway", "nginx", "Принимает и перенаправляет все входящие запросы")
+  Container(Kafka, "Kafka")
+  Container(WebApp, "Web Application", "ReactJS", "Взаимодействует с пользователем")
 
-        [UsersMicroservice] -> [Kafka]
-        [DevicesMicroservice] -> [Kafka]
-        [ScenariosMicroservice] -> [Kafka]
+  Rel(APIGateway, UsersMicroservice, "Пересылает запрос")
+  Rel(APIGateway, DevicesMicroservice, "Пересылает запрос")
+  Rel(APIGateway, ScenariosMicroservice, "Пересылает запрос")
+
+  Rel(Kafka, UsersMicroservice, "Передаёт межсервисные сообщения")
+  Rel(Kafka, DevicesMicroservice, "Передаёт межсервисные сообщения")
+  Rel(Kafka, ScenariosMicroservice, "Передаёт межсервисные сообщения")
+
+  Rel(UsersMicroservice, Kafka, "Передаёт межсервисные сообщения")
+  Rel(DevicesMicroservice, Kafka, "Передаёт межсервисные сообщения")
+  Rel(ScenariosMicroservice, Kafka, "Передаёт межсервисные сообщения")
+
+  Rel(UsersMicroservice, UserDB, "Хранит данные")
+  Rel(DevicesMicroservice, DevicesDB, "Хранит данные")
+  Rel(ScenariosMicroservice, ScenariosDB, "Хранит данные")
+
+  Rel(WebApp, APIGateway, "Передаёт данные")
 }
 
-[Датчик]->[APIGateway]
-[Пользователь]->[APIGateway]
+Rel(device, APIGateway, "Передаёт показания и получает команды")
+Rel(Customer, WebApp, "Взаимодействует с платформой по веб-интерфейсу")
 
 @enduml

@@ -32,9 +32,17 @@ entity Device {
 entity DeviceGroup {
   * device_group_id : NUMBER
   --
-  user_id : FKEY
   name : VARCHAR
   location : VARCHAR
+}
+
+entity PermissionsDeviceGroup {
+  * permission_id : NUMBER
+  --
+  device_group_id : FKEY
+  user_id : FKEY
+  owner_id : FKEY
+  name : VARCHAR
 }
 
 entity Telemetry {
@@ -90,7 +98,8 @@ entity SupportRequestMessage {
 
 DeviceVendor ||--o{ DeviceType
 DeviceGroup ||--o{ Device
-User ||--o{ DeviceGroup
+User ||--o{ PermissionsDeviceGroup
+PermissionsDeviceGroup ||--{ DeviceGroup
 DeviceType ||--o{ Device
 Device ||--o{ Telemetry
 User ||--o{ Condition

@@ -1,11 +1,21 @@
 @startuml
-skinparam BackgroundColor transparent
-skinparam componentStyle rectangle
-component "Тёплый дом" {
-        component "Монолит"
+title Диаграмма контекста текущей реализации системы "Тёплый дом"
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(Customer, "Клиент компании")
+Person(Technician, "Настройщик оборудования")
+
+System_Boundary(c1, "Тёплый дом") {
+    Container(monolith_app, "Монолитное приложение")
 }
-[Датчик]->[Монолит]
-[Монолит]->[Датчик]
-[Пользователь]->[Монолит]
-[Специалист по подключению]->[Монолит]
+
+System(device, "Датчик")
+
+Rel(Technician, monolith_app, "Подключает оборудование к системе")
+Rel(Customer, monolith_app, "Использует подключенное оборудование")
+Rel(device, monolith_app, "Отправляет показания и получает команды")
+
 @enduml
